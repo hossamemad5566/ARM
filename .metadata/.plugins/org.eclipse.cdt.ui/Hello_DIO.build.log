@@ -1,0 +1,30 @@
+23:39:41 **** Incremental Build of configuration Debug for project Hello_DIO ****
+make all 
+Building file: ../src/LED_switch_7seg_main.c
+Invoking: Cross ARM GNU C Compiler
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -DDEBUG -DUSE_FULL_ASSERT -DTRACE -DOS_USE_TRACE_SEMIHOSTING_DEBUG -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -DDEBUG -DUSE_FULL_ASSERT -DTRACE -DOS_USE_TRACE_SEMIHOSTING_DEBUG -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DHSE_VALUE=8000000 -I"../include" -I"../system/include" -I"../system/include/cmsis" -I"../system/include/stm32f1-stdperiph" -I"../include" -I"../system/include" -I"../system/include/cmsis" -I"../system/include/stm32f1-stdperiph" -std=gnu11 -MMD -MP -MF"src/LED_switch_7seg_main.d" -MT"src/LED_switch_7seg_main.o" -c -o "src/LED_switch_7seg_main.o" "../src/LED_switch_7seg_main.c"
+../src/LED_switch_7seg_main.c: In function 'main':
+../src/LED_switch_7seg_main.c:40:5: warning: unused variable 'w' [-Wunused-variable]
+ u16 w = 500 ;
+     ^
+Finished building: ../src/LED_switch_7seg_main.c
+ 
+Building target: Hello_DIO.elf
+Invoking: Cross ARM GNU C++ Linker
+arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -ffreestanding -fno-move-loop-invariants -Wall -Wextra  -g3 -T mem.ld -T libs.ld -T sections.ld -nostartfiles -Xlinker --gc-sections -L"../ldscripts" -Wl,-Map,"Hello_DIO.map" --specs=nano.specs -o "Hello_DIO.elf"  ./src/DIO_program.o ./src/LED_switch_7seg_main.o ./src/RCC_program.o   
+d:/prog/03- imt sdk/imt_sdk_win_64/imt_sdk_win_64/winarm/armgcc/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/bin/ld.exe: warning: cannot find entry symbol _start; defaulting to 08000028
+Finished building target: Hello_DIO.elf
+ 
+Invoking: Cross ARM GNU Create Flash Image
+arm-none-eabi-objcopy -O ihex "Hello_DIO.elf"  "Hello_DIO.hex"
+Finished building: Hello_DIO.hex
+ 
+Invoking: Cross ARM GNU Print Size
+arm-none-eabi-size --format=berkeley "Hello_DIO.elf"
+   text	   data	    bss	    dec	    hex	filename
+      0	     40	    256	    296	    128	Hello_DIO.elf
+Finished building: Hello_DIO.siz
+ 
+
+23:39:41 Build Finished (took 740ms)
+
