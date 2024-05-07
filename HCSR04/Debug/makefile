@@ -52,6 +52,9 @@ default.size.stdout \
 OBJDUMP_LIST += \
 HCSR04.list \
 
+OBJCOPY_HEX += \
+HCSR04.hex \
+
 
 # All Target
 all: main-build
@@ -75,12 +78,17 @@ HCSR04.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+HCSR04.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "HCSR04.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) HCSR04.elf HCSR04.list HCSR04.map default.size.stdout
+	-$(RM) HCSR04.elf HCSR04.hex HCSR04.list HCSR04.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'

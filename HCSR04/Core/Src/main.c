@@ -42,6 +42,8 @@
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
 
+UART_HandleTypeDef huart1;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -50,6 +52,7 @@ TIM_HandleTypeDef htim1;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -58,7 +61,7 @@ static void MX_TIM1_Init(void);
 /* USER CODE BEGIN 0 */
 extern uint8_t Distance3 ;
 extern uint8_t Distance4 ;
-extern Ultrasonic_t HCSR04_sensor[4];
+extern Ultrasonic_t HCSR04_sensor[1];
 
 /* USER CODE END 0 */
 
@@ -92,17 +95,19 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	HCSR04_Init();
   /* USER CODE END 2 */
-
+  uint8_t tx_buffer[20] = "Welcome to USB";
+  HAL_UART_Transmit(&huart1,tx_buffer,20,HAL_MAX_DELAY);
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	while (1)
 	{
 		HCSR04_Read1();
-		HCSR04_Read2();
-		HAL_Delay(100);
+		HAL_Delay(500);
+    HAL_UART_Transmit(&huart1,&(HCSR04_sensor[0].Distance),1,10);
 		if (HCSR04_sensor[0].Distance > 5)
 		{
 			HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_RESET);
@@ -111,14 +116,14 @@ int main(void)
 		{
 			HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,GPIO_PIN_SET);
 		}
-		if (HCSR04_sensor[1].Distance> 5)
-		{
-			HAL_GPIO_WritePin(LED_O_GPIO_Port,LED_O_Pin,GPIO_PIN_SET);
-		}
-		else
-		{
-			HAL_GPIO_WritePin(LED_O_GPIO_Port,LED_O_Pin,GPIO_PIN_RESET);
-		}
+		// if (HCSR04_sensor[1].Distance> 5)
+		// {
+		// 	HAL_GPIO_WritePin(LED_O_GPIO_Port,LED_O_Pin,GPIO_PIN_SET);
+		// }
+		// else
+		// {
+		// 	HAL_GPIO_WritePin(LED_O_GPIO_Port,LED_O_Pin,GPIO_PIN_RESET);
+		// }
 		
 
     /* USER CODE END WHILE */
@@ -239,6 +244,39 @@ static void MX_TIM1_Init(void)
 }
 
 /**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 9600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -256,7 +294,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_10|GPIO_PIN_11|GPIO_PIN_12|GPIO_PIN_13

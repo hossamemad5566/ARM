@@ -17,7 +17,7 @@ void delay (uint16_t time)
 
 
 /*generate 4 sensors struct*/
-Ultrasonic_t HCSR04_sensor[4];
+Ultrasonic_t HCSR04_sensor[1];
 
 
 
@@ -61,113 +61,113 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		}
 	}
 
-	if (   (htim == &htim1)  && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)  // if the interrupt source is channel1
-	{
-		if (HCSR04_sensor[1].Is_First_Captured==0) // if the first value is not captured
-		{
-			HCSR04_sensor[1].IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2); // read the first value
-			HCSR04_sensor[1].Is_First_Captured = 1;  // set the first captured as true
-			// Now change the polarity to falling edge
-			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2, TIM_INPUTCHANNELPOLARITY_FALLING);
-		}
+	// if (   (htim == &htim1)  && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)  // if the interrupt source is channel1
+	// {
+	// 	if (HCSR04_sensor[1].Is_First_Captured==0) // if the first value is not captured
+	// 	{
+	// 		HCSR04_sensor[1].IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2); // read the first value
+	// 		HCSR04_sensor[1].Is_First_Captured = 1;  // set the first captured as true
+	// 		// Now change the polarity to falling edge
+	// 		__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2, TIM_INPUTCHANNELPOLARITY_FALLING);
+	// 	}
 
-		else if (HCSR04_sensor[1].Is_First_Captured==1)   // if the first is already captured
-		{
-			HCSR04_sensor[1].IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);  // read second value
-			__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
+	// 	else if (HCSR04_sensor[1].Is_First_Captured==1)   // if the first is already captured
+	// 	{
+	// 		HCSR04_sensor[1].IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);  // read second value
+	// 		__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
 
-			if (HCSR04_sensor[1].IC_Val2 > HCSR04_sensor[1].IC_Val1)
-			{
-				HCSR04_sensor[1].Difference = HCSR04_sensor[1].IC_Val2-HCSR04_sensor[1].IC_Val1;
-			}
+	// 		if (HCSR04_sensor[1].IC_Val2 > HCSR04_sensor[1].IC_Val1)
+	// 		{
+	// 			HCSR04_sensor[1].Difference = HCSR04_sensor[1].IC_Val2-HCSR04_sensor[1].IC_Val1;
+	// 		}
 
-			else if (HCSR04_sensor[1].IC_Val1 > HCSR04_sensor[1].IC_Val2)
-			{
-				HCSR04_sensor[1].Difference = (0xffff - HCSR04_sensor[1].IC_Val1) + HCSR04_sensor[1].IC_Val2;
-			}
+	// 		else if (HCSR04_sensor[1].IC_Val1 > HCSR04_sensor[1].IC_Val2)
+	// 		{
+	// 			HCSR04_sensor[1].Difference = (0xffff - HCSR04_sensor[1].IC_Val1) + HCSR04_sensor[1].IC_Val2;
+	// 		}
 
-			HCSR04_sensor[1].Distance = HCSR04_sensor[1].Difference * .034/2;
-			HCSR04_sensor[1].Is_First_Captured = 0; // set it back to false
+	// 		HCSR04_sensor[1].Distance = HCSR04_sensor[1].Difference * .034/2;
+	// 		HCSR04_sensor[1].Is_First_Captured = 0; // set it back to false
 
-			// set polarity to rising edge
-			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2, TIM_INPUTCHANNELPOLARITY_RISING);
-			__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC2);
-		}
-	}
-	if (   (htim == &htim1)  && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)  // if the interrupt source is channel1
-	{
-		if (HCSR04_sensor[2].Is_First_Captured==0) // if the first value is not captured
-		{
-			HCSR04_sensor[2].IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3); // read the first value
-			HCSR04_sensor[2].Is_First_Captured = 1;  // set the first captured as true
-			// Now change the polarity to falling edge
-			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_FALLING);
-		}
+	// 		// set polarity to rising edge
+	// 		__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_2, TIM_INPUTCHANNELPOLARITY_RISING);
+	// 		__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC2);
+	// 	}
+	// }
+	// if (   (htim == &htim1)  && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_3)  // if the interrupt source is channel1
+	// {
+	// 	if (HCSR04_sensor[2].Is_First_Captured==0) // if the first value is not captured
+	// 	{
+	// 		HCSR04_sensor[2].IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3); // read the first value
+	// 		HCSR04_sensor[2].Is_First_Captured = 1;  // set the first captured as true
+	// 		// Now change the polarity to falling edge
+	// 		__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_FALLING);
+	// 	}
 
-		else if (HCSR04_sensor[2].Is_First_Captured==1)   // if the first is already captured
-		{
-			HCSR04_sensor[2].IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);  // read second value
-			__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
+	// 	else if (HCSR04_sensor[2].Is_First_Captured==1)   // if the first is already captured
+	// 	{
+	// 		HCSR04_sensor[2].IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_3);  // read second value
+	// 		__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
 
-			if (HCSR04_sensor[2].IC_Val2 > HCSR04_sensor[2].IC_Val1)
-			{
-				HCSR04_sensor[2].Difference = HCSR04_sensor[2].IC_Val2-HCSR04_sensor[2].IC_Val1;
-			}
+	// 		if (HCSR04_sensor[2].IC_Val2 > HCSR04_sensor[2].IC_Val1)
+	// 		{
+	// 			HCSR04_sensor[2].Difference = HCSR04_sensor[2].IC_Val2-HCSR04_sensor[2].IC_Val1;
+	// 		}
 
-			else if (HCSR04_sensor[2].IC_Val1 > HCSR04_sensor[2].IC_Val2)
-			{
-				HCSR04_sensor[2].Difference = (0xffff - HCSR04_sensor[2].IC_Val1) + HCSR04_sensor[2].IC_Val2;
-			}
+	// 		else if (HCSR04_sensor[2].IC_Val1 > HCSR04_sensor[2].IC_Val2)
+	// 		{
+	// 			HCSR04_sensor[2].Difference = (0xffff - HCSR04_sensor[2].IC_Val1) + HCSR04_sensor[2].IC_Val2;
+	// 		}
 
-			HCSR04_sensor[2].Distance = HCSR04_sensor[2].Difference * .034/2;
-			HCSR04_sensor[2].Is_First_Captured = 0; // set it back to false
+	// 		HCSR04_sensor[2].Distance = HCSR04_sensor[2].Difference * .034/2;
+	// 		HCSR04_sensor[2].Is_First_Captured = 0; // set it back to false
 
-			// set polarity to rising edge
-			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_RISING);
-			__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC3);
-		}
-	}
+	// 		// set polarity to rising edge
+	// 		__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_3, TIM_INPUTCHANNELPOLARITY_RISING);
+	// 		__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC3);
+	// 	}
+	// }
 
-	if (   (htim == &htim1)  && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)  // if the interrupt source is channel1
-	{
-		if (HCSR04_sensor[3].Is_First_Captured==0) // if the first value is not captured
-		{
-			HCSR04_sensor[3].IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4); // read the first value
-			HCSR04_sensor[3].Is_First_Captured = 1;  // set the first captured as true
-			// Now change the polarity to falling edge
-			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4, TIM_INPUTCHANNELPOLARITY_FALLING);
-		}
+	// if (   (htim == &htim1)  && htim->Channel == HAL_TIM_ACTIVE_CHANNEL_4)  // if the interrupt source is channel1
+	// {
+	// 	if (HCSR04_sensor[3].Is_First_Captured==0) // if the first value is not captured
+	// 	{
+	// 		HCSR04_sensor[3].IC_Val1 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4); // read the first value
+	// 		HCSR04_sensor[3].Is_First_Captured = 1;  // set the first captured as true
+	// 		// Now change the polarity to falling edge
+	// 		__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4, TIM_INPUTCHANNELPOLARITY_FALLING);
+	// 	}
 
-		else if (HCSR04_sensor[3].Is_First_Captured==1)   // if the first is already captured
-		{
-			HCSR04_sensor[3].IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);  // read second value
-			__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
+	// 	else if (HCSR04_sensor[3].Is_First_Captured==1)   // if the first is already captured
+	// 	{
+	// 		HCSR04_sensor[3].IC_Val2 = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_4);  // read second value
+	// 		__HAL_TIM_SET_COUNTER(htim, 0);  // reset the counter
 
-			if (HCSR04_sensor[3].IC_Val2 > HCSR04_sensor[3].IC_Val1)
-			{
-				HCSR04_sensor[3].Difference = HCSR04_sensor[3].IC_Val2-HCSR04_sensor[3].IC_Val1;
-			}
+	// 		if (HCSR04_sensor[3].IC_Val2 > HCSR04_sensor[3].IC_Val1)
+	// 		{
+	// 			HCSR04_sensor[3].Difference = HCSR04_sensor[3].IC_Val2-HCSR04_sensor[3].IC_Val1;
+	// 		}
 
-			else if (HCSR04_sensor[3].IC_Val1 > HCSR04_sensor[3].IC_Val2)
-			{
-				HCSR04_sensor[3].Difference = (0xffff - HCSR04_sensor[3].IC_Val1) + HCSR04_sensor[3].IC_Val2;
-			}
+	// 		else if (HCSR04_sensor[3].IC_Val1 > HCSR04_sensor[3].IC_Val2)
+	// 		{
+	// 			HCSR04_sensor[3].Difference = (0xffff - HCSR04_sensor[3].IC_Val1) + HCSR04_sensor[3].IC_Val2;
+	// 		}
 
-			HCSR04_sensor[3].Distance = HCSR04_sensor[3].Difference * .034/2;
-			HCSR04_sensor[3].Is_First_Captured = 0; // set it back to false
+	// 		HCSR04_sensor[3].Distance = HCSR04_sensor[3].Difference * .034/2;
+	// 		HCSR04_sensor[3].Is_First_Captured = 0; // set it back to false
 
-			// set polarity to rising edge
-			__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4, TIM_INPUTCHANNELPOLARITY_RISING);
-			__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC4);
-		}
-	}
+	// 		// set polarity to rising edge
+	// 		__HAL_TIM_SET_CAPTUREPOLARITY(htim, TIM_CHANNEL_4, TIM_INPUTCHANNELPOLARITY_RISING);
+	// 		__HAL_TIM_DISABLE_IT(&htim1, TIM_IT_CC4);
+	// 	}
+	// }
 }
 void HCSR04_Init(void)
 {
 	HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
-	HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
-	HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_3);
-	HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_4);
+	// HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
+	// HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_3);
+	// HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_4);
 }
 
 void HCSR04_Read1 (void)
@@ -179,6 +179,7 @@ void HCSR04_Read1 (void)
 	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC1);
 }
 
+#if 0
 void HCSR04_Read2 (void)
 {
 	HAL_GPIO_WritePin(TRIG_PORT_2, TRIG_PIN_2, GPIO_PIN_SET);  // pull the TRIG pin HIGH
@@ -205,4 +206,5 @@ void HCSR04_Read4 (void)
 
 	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_CC4);
 }
+#endif
 

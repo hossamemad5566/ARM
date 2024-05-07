@@ -32,8 +32,8 @@ typedef struct
 void delay (uint16_t time);
 void HCSR04_Init(void);
 void HCSR04_Read1 (void);
-void HCSR04_Read2 (void);
-void HCSR04_Read3 (void);
-void HCSR04_Read4 (void);
+// void HCSR04_Read2 (void);
+// void HCSR04_Read3 (void);
+// void HCSR04_Read4 (void);
 
 #endif 
