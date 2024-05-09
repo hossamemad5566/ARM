@@ -1,10 +1,10 @@
-13:00:39 **** Incremental Build of configuration Debug for project HCSR04 ****
+15:29:26 **** Incremental Build of configuration Debug for project HCSR04 ****
 make -j20 all 
 arm-none-eabi-size  HCSR04.elf 
    text	   data	    bss	    dec	    hex	filename
-  15756	     12	   1804	  17572	   44a4	HCSR04.elf
+  26640	     16	   8280	  34936	   8878	HCSR04.elf
 Finished building: default.size.stdout
  
 
-13:00:39 Build Finished. 0 errors, 0 warnings. (took 145ms)
+15:29:26 Build Finished. 0 errors, 0 warnings. (took 213ms)
 
