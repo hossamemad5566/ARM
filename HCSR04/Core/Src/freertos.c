@@ -26,7 +26,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include"Ultrasonic.h"
-
+#include "usart.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -130,7 +130,7 @@ void Led_Task(void *argument)
   for(;;)
   {
     HAL_GPIO_TogglePin(LED_GPIO_Port,LED_Pin);
-    HAL_UART_Transmit(&huart1,(uint8_t*)"Led_T",6,HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1,"Led_T",6,HAL_MAX_DELAY);
     osDelay(200);
   }
   /* USER CODE END Led_Task */
@@ -152,6 +152,7 @@ void distance_get(void *argument)
   for(;;)
   {
     distance = Get_Distance();
+    HAL_UART_Transmit(&huart1,&distance,1,10);
     if(distance > 5)
     {
       HAL_GPIO_WritePin(LED_O_GPIO_Port,LED_O_Pin,GPIO_PIN_RESET);
@@ -159,7 +160,7 @@ void distance_get(void *argument)
     else{
       HAL_GPIO_WritePin(LED_O_GPIO_Port,LED_O_Pin,GPIO_PIN_SET);
     }
-    HAL_UART_Transmit(&huart1,&distance,1,10);
+    
   }
   /* USER CODE END distance_get */
 }

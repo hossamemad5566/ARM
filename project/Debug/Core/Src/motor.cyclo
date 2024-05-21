@@ -1,0 +1,9 @@
+../Core/Src/motor.c:23:6:Motor_voidInit	1
+../Core/Src/motor.c:37:6:Motor_voidControlSpeed	1
+../Core/Src/motor.c:46:6:Motor_voidMoveForward	1
+../Core/Src/motor.c:61:6:Motor_voidMoveBackward	1
+../Core/Src/motor.c:77:6:Motor_voidMoveRight	1
+../Core/Src/motor.c:92:6:Motor_voidMoveLeft	1
+../Core/Src/motor.c:103:6:Motor_voidStop	1
+../Core/Src/motor.c:114:6:Motor_voidMoveMiddle	1
+../Core/Src/motor.c:122:6:Motor_voidDirection	5
