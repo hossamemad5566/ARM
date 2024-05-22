@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * File Name          : freertos.c
-  * Description        : Code for freertos applications
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * File Name          : freertos.c
+ * Description        : Code for freertos applications
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2024 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -25,7 +25,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <string.h>
+#include <stdio.h>
+#include "semphr.h"
+#include "queue.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,60 +43,74 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define BLOCKING_CHANCES 4
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-uint8_t Speed =9;
+/*input password*/
+static uint8_t Password_In[10] = {0};
+/*saved password*/
+static uint8_t Password_Ch[] = "123456789";
+/*enum for state machine*/
+typedef enum
+{
+  welcome,
+  receive,
+  submit
+} DisplayState_t;
+
+uint8_t BlockFlag = 0;
+
 /* USER CODE END Variables */
-/* Definitions for LED1 */
-osThreadId_t LED1Handle;
-const osThreadAttr_t LED1_attributes = {
-  .name = "LED1",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+/* Definitions for Confirmation */
+osThreadId_t ConfirmationHandle;
+const osThreadAttr_t Confirmation_attributes = {
+    .name = "Confirmation",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityNormal3,
 };
-/* Definitions for LED2 */
-osThreadId_t LED2Handle;
-const osThreadAttr_t LED2_attributes = {
-  .name = "LED2",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+/* Definitions for Display */
+osThreadId_t DisplayHandle;
+const osThreadAttr_t Display_attributes = {
+    .name = "Display",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityLow2,
 };
-/* Definitions for LED3 */
-osThreadId_t LED3Handle;
-const osThreadAttr_t LED3_attributes = {
-  .name = "LED3",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+/* Definitions for Input */
+osThreadId_t InputHandle;
+const osThreadAttr_t Input_attributes = {
+    .name = "Input",
+    .stack_size = 128 * 4,
+    .priority = (osPriority_t)osPriorityLow,
 };
-/* Definitions for sw_ */
-osThreadId_t sw_Handle;
-const osThreadAttr_t sw__attributes = {
-  .name = "sw_",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow2,
-};
+/* Definitions for PasswordQueue */
+osMessageQueueId_t PasswordQueueHandle;
+const osMessageQueueAttr_t PasswordQueue_attributes = {
+    .name = "PasswordQueue"};
+/* Definitions for PasswordSemaphore */
+osSemaphoreId_t PasswordSemaphoreHandle;
+const osSemaphoreAttr_t PasswordSemaphore_attributes = {
+    .name = "PasswordSemaphore"};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
 
-void LED1_T(void *argument);
-void LED2_T(void *argument);
-void LED3_T(void *argument);
-void SW_T(void *argument);
+void Confirmation_T(void *argument);
+void Display_T(void *argument);
+void Input_T(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
-  * @brief  FreeRTOS initialization
-  * @param  None
-  * @retval None
-  */
-void MX_FREERTOS_Init(void) {
+ * @brief  FreeRTOS initialization
+ * @param  None
+ * @retval None
+ */
+void MX_FREERTOS_Init(void)
+{
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -101,6 +118,10 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of PasswordSemaphore */
+  PasswordSemaphoreHandle = osSemaphoreNew(1, 0, &PasswordSemaphore_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -110,22 +131,23 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* creation of PasswordQueue */
+  PasswordQueueHandle = osMessageQueueNew(10, sizeof(uint8_t), &PasswordQueue_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of LED1 */
-  LED1Handle = osThreadNew(LED1_T, NULL, &LED1_attributes);
+  /* creation of Confirmation */
+  ConfirmationHandle = osThreadNew(Confirmation_T, NULL, &Confirmation_attributes);
 
-  /* creation of LED2 */
-  LED2Handle = osThreadNew(LED2_T, NULL, &LED2_attributes);
+  /* creation of Display */
+  DisplayHandle = osThreadNew(Display_T, NULL, &Display_attributes);
 
-  /* creation of LED3 */
-  LED3Handle = osThreadNew(LED3_T, NULL, &LED3_attributes);
-
-  /* creation of sw_ */
-  sw_Handle = osThreadNew(SW_T, NULL, &sw__attributes);
+  /* creation of Input */
+  InputHandle = osThreadNew(Input_T, NULL, &Input_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -134,125 +156,171 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
-
 }
 
-/* USER CODE BEGIN Header_LED1_T */
+/* USER CODE BEGIN Header_Confirmation_T */
 /**
-  * @brief  Function implementing the LED1 thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_LED1_T */
-void LED1_T(void *argument)
+ * @brief  Function implementing the Confirmation thread.
+ * @param  argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_Confirmation_T */
+void Confirmation_T(void *argument)
 {
-  /* USER CODE BEGIN LED1_T */
+  /* USER CODE BEGIN Confirmation_T */
+  uint8_t reenterCount = 0;
+  xSemaphoreTake(PasswordSemaphoreHandle, 1000);
+  // HAL_UART_Transmit(&huart1, (uint8_t *)"check ok\r\n", 11, 200);
   /* Infinite loop */
-  TickType_t xLastWakeTime;  /* variable generated  for the VtaskDelayUntil Function  */
-  //const TickType_t xFrequency = pdMS_TO_TICKS(500); /* dealy for 500 ms : the function dMS_TO_TICKS convert the ms to ticks */
-  /* Get the current system tick count */
-  xLastWakeTime = xTaskGetTickCount(); /*The count of ticks since vTaskStartScheduler was called. and it updated inside the kernel*/
-  for(;;)
+  for (;;)
   {
-    HAL_GPIO_TogglePin(LED1_GPIO_Port,LED1_Pin);
-    vTaskDelayUntil(&xLastWakeTime,(Speed*100));
-    HAL_UART_Transmit(&huart1,&Speed,1,HAL_MAX_DELAY);
-    //HAL_UART_Transmit(&huart1,"\n\t",2,HAL_MAX_DELAY);
-  }
-  /* USER CODE END LED1_T */
-}
-
-/* USER CODE BEGIN Header_LED2_T */
-/**
-* @brief Function implementing the LED2 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_LED2_T */
-void LED2_T(void *argument)
-{
-  /* USER CODE BEGIN LED2_T */
-  
-  TickType_t XlastWakeTime;
-  const TickType_t Xfrequency = pdMS_TO_TICKS(1000);
-  /*get the current system tick count*/
-  XlastWakeTime = xTaskGetTickCount();
-
-  /* Infinite loop */
-  for(;;)
-  {
-
-    // HAL_GPIO_TogglePin(LED2_GPIO_Port,LED2_Pin);
-     vTaskDelayUntil(&XlastWakeTime,Xfrequency);
-    // HAL_UART_Transmit(&huart1,"led2\n",6,HAL_MAX_DELAY);
-
-  }
-  /* USER CODE END LED2_T */
-}
-
-/* USER CODE BEGIN Header_LED3_T */
-/**
-* @brief Function implementing the LED3 thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_LED3_T */
-void LED3_T(void *argument)
-{
-  /* USER CODE BEGIN LED3_T */
-   TickType_t XLastWakeTime ;
-   const TickType_t Xfrequency = pdMS_TO_TICKS(500);
-   XLastWakeTime =xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-    // HAL_GPIO_TogglePin(LED3_GPIO_Port,LED3_Pin);
-     vTaskDelayUntil(&XLastWakeTime,Xfrequency);
-    // HAL_UART_Transmit(&huart1,"led3\n",6,HAL_MAX_DELAY);
-
-  }
-  /* USER CODE END LED3_T */
-}
-
-/* USER CODE BEGIN Header_SW_T */
-/**
-* @brief Function implementing the sw_ thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_SW_T */
-void SW_T(void *argument)
-{
-  /* USER CODE BEGIN SW_T */
-  uint8_t flag =0;
-  /* Infinite loop */
-  for(;;)
-  {
-    if(HAL_GPIO_ReadPin(SW_GPIO_Port,SW_Pin)== GPIO_PIN_RESET)
+    xSemaphoreTake(PasswordSemaphoreHandle, HAL_MAX_DELAY);
+    if (strcmp((char *)Password_Ch, (char *)Password_In) == 0)
     {
-      osDelay(50);
-      flag = 1;
+      HAL_UART_Transmit(&huart1, (uint8_t *)"Access granted\t LED ON \r\n", 27, 300);
+      HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, RESET);
+      reenterCount = 0;
     }
-    if(flag ==1)
+    else
     {
-    	flag=0;
-      if(Speed == 1)
+      if(BlockFlag == 0)
       {
-    	  Speed = 9;
+        reenterCount++;
+        HAL_UART_Transmit(&huart1, (uint8_t *)"Access denied\t LED OFF\r\n", 24, 250);
+        HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, SET);
+        if (reenterCount == BLOCKING_CHANCES)
+        {
+          HAL_UART_Transmit(&huart1, (uint8_t *)"you are blocked\r\n", 18, 300);
+          BlockFlag = 1;
+          reenterCount =0;
       }
-      else 
-      {
-    	  Speed-=1;
       }
-
+      
     }
-    osDelay(100);
   }
-  /* USER CODE END SW_T */
+  /* USER CODE END Confirmation_T */
+}
+
+/* USER CODE BEGIN Header_Display_T */
+/**
+ * @brief Function implementing the Display thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_Display_T */
+void Display_T(void *argument)
+{
+  /* USER CODE BEGIN Display_T */
+  DisplayState_t CurrentState = welcome;
+  osStatus queueState = pdFALSE;
+  uint8_t inputKey = 0;
+  uint8_t passwordIndex = 0;
+  // HAL_UART_Transmit(&huart1, (uint8_t *)"Display start\r\n", 16, 200);
+  /* Infinite loop */
+  for (;;)
+  {
+    queueState = xQueueReceive(PasswordQueueHandle, &inputKey, 5000);
+    if (queueState == pdPASS)
+    {
+      switch (CurrentState)
+      {
+      case welcome:
+        if (inputKey == '#')
+        {
+          CurrentState = receive;
+          HAL_UART_Transmit(&huart1, (void *)"\r\nPassword:\t", 13, 200);
+        }
+        break;
+      case receive:
+        if (inputKey == '#')
+        {
+          CurrentState = submit;
+        }
+        else
+        {
+          if (passwordIndex < 9)
+          {
+            Password_In[passwordIndex] = inputKey;
+            passwordIndex++;
+            HAL_UART_Transmit(&huart1, (uint8_t *)"*", 2, 100);
+            if(passwordIndex == 9)
+            {
+              CurrentState = submit;
+              HAL_UART_Transmit(&huart1, (uint8_t *)"\r\nPress # to confirm \r\n", 24, 500);
+
+            }
+          }
+          else{}
+        }
+        break;
+      case submit:                         /*the case to restart the input and test for access */
+        Password_In[passwordIndex] = '\0'; /*add null to the string*/
+        passwordIndex = 0;
+        CurrentState = welcome;
+        /*release the semaphore to fire the confirmation task*/
+        xSemaphoreGive(PasswordSemaphoreHandle);
+        if(BlockFlag == 0)
+        {
+         HAL_UART_Transmit(&huart1, (uint8_t *)"\r\n*** welcome *** press # to enter the password\r\n", 50, 500);       
+        }
+        break;
+      default:
+        break;
+      }
+    }
+    else if (passwordIndex > 0)
+    {
+      /*time out*/
+        Password_In[passwordIndex] = '\0'; /*add null to the string*/
+        passwordIndex = 0;
+        CurrentState = welcome;
+        /*release the semaphore to fire the confirmation task*/
+        xSemaphoreGive(PasswordSemaphoreHandle);
+        if(BlockFlag == 0)
+        {
+         HAL_UART_Transmit(&huart1, (uint8_t *)"\r\n*** welcome *** press # to enter the password\r\n", 50, 500);       
+        }
+    }
+  }
+  /* USER CODE END Display_T */
+}
+
+/* USER CODE BEGIN Header_Input_T */
+/**
+ * @brief Function implementing the Input thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_Input_T */
+void Input_T(void *argument)
+{
+  /* USER CODE BEGIN Input_T */
+  HAL_GPIO_WritePin(LED_GPIO_Port,LED_Pin,SET);
+  uint8_t inputKey = 0;
+  uint8_t uartReturnState = HAL_BUSY;
+  HAL_UART_Transmit(&huart1, (uint8_t *)"\r\n*** welcome *** press # to enter the password\r\n", 50, 500);
+  /* Infinite loop */
+  for (;;)
+  {
+    uartReturnState = HAL_UART_Receive(&huart1, &inputKey, 1, 5000);
+    if( uartReturnState == HAL_OK   )
+    {
+      if (BlockFlag == 0)
+      {
+        xQueueSend(PasswordQueueHandle, (void *)&inputKey, 0); /*message send to queue*/
+        osDelay(50);                                           /*the 50 ms is min value for human i/p*/
+      }
+      else
+      {
+        HAL_UART_Transmit(&huart1, (uint8_t *)"you are blocked\r\n", 18, 200);
+      }
+    }
+      
+  }
+  /* USER CODE END Input_T */
 }
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
-
