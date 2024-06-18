@@ -66,32 +66,34 @@ uint8_t BlockFlag = 0;
 /* Definitions for Confirmation */
 osThreadId_t ConfirmationHandle;
 const osThreadAttr_t Confirmation_attributes = {
-    .name = "Confirmation",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityNormal3,
+  .name = "Confirmation",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal3,
 };
 /* Definitions for Display */
 osThreadId_t DisplayHandle;
 const osThreadAttr_t Display_attributes = {
-    .name = "Display",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityLow2,
+  .name = "Display",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow2,
 };
 /* Definitions for Input */
 osThreadId_t InputHandle;
 const osThreadAttr_t Input_attributes = {
-    .name = "Input",
-    .stack_size = 128 * 4,
-    .priority = (osPriority_t)osPriorityLow,
+  .name = "Input",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for PasswordQueue */
 osMessageQueueId_t PasswordQueueHandle;
 const osMessageQueueAttr_t PasswordQueue_attributes = {
-    .name = "PasswordQueue"};
+  .name = "PasswordQueue"
+};
 /* Definitions for PasswordSemaphore */
 osSemaphoreId_t PasswordSemaphoreHandle;
 const osSemaphoreAttr_t PasswordSemaphore_attributes = {
-    .name = "PasswordSemaphore"};
+  .name = "PasswordSemaphore"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -105,12 +107,11 @@ void Input_T(void *argument);
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
 /**
- * @brief  FreeRTOS initialization
- * @param  None
- * @retval None
- */
-void MX_FREERTOS_Init(void)
-{
+  * @brief  FreeRTOS initialization
+  * @param  None
+  * @retval None
+  */
+void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -133,7 +134,7 @@ void MX_FREERTOS_Init(void)
 
   /* Create the queue(s) */
   /* creation of PasswordQueue */
-  PasswordQueueHandle = osMessageQueueNew(10, sizeof(uint8_t), &PasswordQueue_attributes);
+  PasswordQueueHandle = osMessageQueueNew (10, sizeof(uint8_t), &PasswordQueue_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -156,6 +157,7 @@ void MX_FREERTOS_Init(void)
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
   /* USER CODE END RTOS_EVENTS */
+
 }
 
 /* USER CODE BEGIN Header_Confirmation_T */
@@ -302,7 +304,7 @@ void Input_T(void *argument)
   /* Infinite loop */
   for (;;)
   {
-    uartReturnState = HAL_UART_Receive(&huart1, &inputKey, 1, 5000);
+    uartReturnState = HAL_UART_Receive(&huart2, &inputKey, 1, 5000);
     if( uartReturnState == HAL_OK   )
     {
       if (BlockFlag == 0)
@@ -324,3 +326,4 @@ void Input_T(void *argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
+
