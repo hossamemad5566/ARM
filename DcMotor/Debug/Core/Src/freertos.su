@@ -1,0 +1,4 @@
+../Core/Src/freertos.c:90:6:MX_FREERTOS_Init	8	static
+../Core/Src/freertos.c:138:6:UART_T	16	static
+../Core/Src/freertos.c:156:6:ADCRead_T	16	static
+../Core/Src/freertos.c:174:6:Motor_T	16	static

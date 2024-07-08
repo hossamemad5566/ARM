@@ -1,0 +1,4 @@
+../Core/Src/Motor.c:4:6:Motor_Move_R	1
+../Core/Src/Motor.c:10:6:Motor_Move_L	1
+../Core/Src/Motor.c:16:6:Motor_Stop	1
+../Core/Src/Motor.c:22:6:Motor_Set_Speed	1
